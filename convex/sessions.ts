@@ -4,6 +4,7 @@ import { v } from 'convex/values'
 import {
   assertCanManageSession,
   assertCanViewParticipants,
+  resolveCurrentUserId,
   assertStudioMember,
 } from './lib/authz'
 import {
@@ -949,6 +950,178 @@ export const listStudioMemberOptions = query({
       .sort((a, b) => a.name.localeCompare(b.name))
   },
 })
+
+export const listMyUpcomingReservations = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await resolveCurrentUserId(ctx)
+    if (userId === null) {
+      throw new Error('Create your profile to view reservations.')
+    }
+
+    const now = Date.now()
+    const participantRows = await ctx.db
+      .query('sessionParticipants')
+      .withIndex('by_participant_user_id', (q) => q.eq('participantUserId', userId))
+      .collect()
+
+    const rootParticipation = new Map<Id<'sessions'>, {
+      isActive: boolean
+      updatedAt: number
+    }>()
+
+    for (const row of participantRows) {
+      const existing = rootParticipation.get(row.rootSeriesId)
+      if (existing === undefined || row.updatedAt > existing.updatedAt) {
+        rootParticipation.set(row.rootSeriesId, {
+          isActive: row.participantStatus === 'active',
+          updatedAt: row.updatedAt,
+        })
+      }
+    }
+
+    const occurrenceByInstanceId = new Map<string, Doc<'sessionOccurrences'>>()
+
+    for (const rootSeriesId of rootParticipation.keys()) {
+      const occurrences = await ctx.db
+        .query('sessionOccurrences')
+        .withIndex('by_root_series_id_and_start_at_utc', (q) =>
+          q.eq('rootSeriesId', rootSeriesId).gte('startAtUtc', now),
+        )
+        .take(100)
+
+      for (const occurrence of occurrences) {
+        const instanceId = toOccurrenceInstanceId(occurrence)
+        if (instanceId === null) {
+          continue
+        }
+
+        const existing = occurrenceByInstanceId.get(instanceId)
+        if (
+          existing === undefined ||
+          occurrence.generationVersion > existing.generationVersion ||
+          (occurrence.generationVersion === existing.generationVersion &&
+            occurrence.generatedAt > existing.generatedAt)
+        ) {
+          occurrenceByInstanceId.set(instanceId, occurrence)
+        }
+      }
+    }
+
+    const studioNameCache = new Map<Id<'studios'>, string>()
+    const participantOverrideCache = new Map<string, boolean>()
+
+    const sortedOccurrences = Array.from(occurrenceByInstanceId.values()).sort(
+      (a, b) => a.startAtUtc - b.startAtUtc,
+    )
+
+    const upcoming: Array<{
+      instanceId: string
+      rootSeriesId: Id<'sessions'>
+      studioId: Id<'studios'>
+      studioName: string
+      title: string
+      location: string | null
+      startAtUtc: number
+      endAtUtc: number
+      timezone: string
+      sourceType: 'single' | 'detached' | 'recurring_generated'
+    }> = []
+
+    for (const occurrence of sortedOccurrences) {
+      if (upcoming.length >= 10) {
+        break
+      }
+      if (occurrence.isCancelled || occurrence.organizerId === userId) {
+        continue
+      }
+
+      const instanceId = toOccurrenceInstanceId(occurrence)
+      if (instanceId === null || occurrence.rootSeriesId === null) {
+        continue
+      }
+
+      const baseParticipation = rootParticipation.get(occurrence.rootSeriesId)
+      if (baseParticipation === undefined) {
+        continue
+      }
+
+      let isParticipant = baseParticipation.isActive
+      if (occurrence.recurrenceIdUtc !== null) {
+        const cacheKey = `${occurrence.rootSeriesId}:${occurrence.recurrenceIdUtc}`
+        const cached = participantOverrideCache.get(cacheKey)
+        if (cached === undefined) {
+          const exceptions = await ctx.db
+            .query('sessionParticipantExceptions')
+            .withIndex('by_root_series_id_and_recurrence_id_utc', (q) =>
+              q
+                .eq('rootSeriesId', occurrence.rootSeriesId!)
+                .eq('recurrenceIdUtc', occurrence.recurrenceIdUtc!),
+            )
+            .collect()
+
+          let participationForOccurrence = isParticipant
+          for (const exception of exceptions) {
+            if (exception.participantUserId !== userId) {
+              continue
+            }
+            participationForOccurrence = exception.kind === 'add'
+          }
+
+          participantOverrideCache.set(cacheKey, participationForOccurrence)
+          isParticipant = participationForOccurrence
+        } else {
+          isParticipant = cached
+        }
+      }
+
+      if (!isParticipant) {
+        continue
+      }
+
+      let studioName = studioNameCache.get(occurrence.studioId)
+      if (studioName === undefined) {
+        const studio = await ctx.db.get(occurrence.studioId)
+        studioName = studio?.name ?? 'Unknown studio'
+        studioNameCache.set(occurrence.studioId, studioName)
+      }
+
+      upcoming.push({
+        instanceId,
+        rootSeriesId: occurrence.rootSeriesId,
+        studioId: occurrence.studioId,
+        studioName,
+        title: occurrence.title,
+        location: occurrence.location,
+        startAtUtc: occurrence.startAtUtc,
+        endAtUtc: occurrence.endAtUtc,
+        timezone: occurrence.timezone,
+        sourceType: occurrence.sourceType,
+      })
+    }
+
+    return upcoming
+  },
+})
+
+function toOccurrenceInstanceId(occurrence: Doc<'sessionOccurrences'>) {
+  if (occurrence.sourceType === 'recurring_generated') {
+    if (occurrence.seriesId === null || occurrence.recurrenceIdUtc === null) {
+      return null
+    }
+    return `rec:${occurrence.seriesId}:${occurrence.recurrenceIdUtc}`
+  }
+
+  if (occurrence.sessionId === null) {
+    return null
+  }
+
+  if (occurrence.sourceType === 'detached') {
+    return `det:${occurrence.sessionId}`
+  }
+
+  return `single:${occurrence.sessionId}`
+}
 
 async function applySeriesAllEventsPatch(
   ctx: MutationCtx,

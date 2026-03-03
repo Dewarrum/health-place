@@ -158,6 +158,7 @@ export default defineSchema({
   })
     .index('by_studio_id_and_start_at_utc', ['studioId', 'startAtUtc'])
     .index('by_organizer_id_and_start_at_utc', ['organizerId', 'startAtUtc'])
+    .index('by_root_series_id_and_start_at_utc', ['rootSeriesId', 'startAtUtc'])
     .index('by_series_id_and_recurrence_id_utc', ['seriesId', 'recurrenceIdUtc'])
     .index('by_session_id', ['sessionId']),
   sessionParticipants: defineTable({
@@ -179,6 +180,7 @@ export default defineSchema({
   })
     .index('by_root_series_id', ['rootSeriesId'])
     .index('by_root_series_id_and_participant_user_id', ['rootSeriesId', 'participantUserId'])
+    .index('by_participant_user_id', ['participantUserId'])
     .index('by_participant_email', ['participantEmail']),
   sessionParticipantExceptions: defineTable({
     rootSeriesId: v.id('sessions'),

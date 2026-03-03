@@ -1,10 +1,29 @@
-import { createFileRoute, useLocation } from '@tanstack/react-router'
+import { convexQuery } from '@convex-dev/react-query'
+import { createFileRoute, redirect, useLocation } from '@tanstack/react-router'
 import { SignIn } from '@clerk/tanstack-react-start'
+import { api } from 'convex/_generated/api'
 
 export const Route = createFileRoute('/_authed')({
-  beforeLoad: ({ context }) => {
+  beforeLoad: async ({ context, location }) => {
     if (!context.userId) {
       throw new Error('Not authenticated')
+    }
+
+    if (location.pathname === '/user') {
+      return
+    }
+
+    const profile = await context.queryClient.ensureQueryData(
+      convexQuery(api.user.profile, {}),
+    )
+
+    if (profile === null) {
+      throw redirect({
+        to: '/user',
+        search: {
+          redirectTo: `${location.pathname}${location.searchStr}`,
+        },
+      })
     }
   },
   errorComponent: ({ error }) => {

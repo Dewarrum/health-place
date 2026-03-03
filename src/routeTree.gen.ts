@@ -13,6 +13,7 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedUserRouteImport } from './routes/_authed/user'
 import { Route as AuthedStudiosRouteImport } from './routes/_authed/studios'
+import { Route as AuthedReservationsRouteImport } from './routes/_authed/reservations'
 import { Route as AuthedStudiosStudioIdRouteImport } from './routes/_authed/studios_.$studioId'
 import { Route as AuthedStudiosStudioIdSessionsRouteImport } from './routes/_authed/studios_.$studioId.sessions'
 
@@ -35,6 +36,11 @@ const AuthedStudiosRoute = AuthedStudiosRouteImport.update({
   path: '/studios',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedReservationsRoute = AuthedReservationsRouteImport.update({
+  id: '/reservations',
+  path: '/reservations',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedStudiosStudioIdRoute = AuthedStudiosStudioIdRouteImport.update({
   id: '/studios_/$studioId',
   path: '/studios/$studioId',
@@ -49,6 +55,7 @@ const AuthedStudiosStudioIdSessionsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/reservations': typeof AuthedReservationsRoute
   '/studios': typeof AuthedStudiosRoute
   '/user': typeof AuthedUserRoute
   '/studios/$studioId': typeof AuthedStudiosStudioIdRouteWithChildren
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/reservations': typeof AuthedReservationsRoute
   '/studios': typeof AuthedStudiosRoute
   '/user': typeof AuthedUserRoute
   '/studios/$studioId': typeof AuthedStudiosStudioIdRouteWithChildren
@@ -65,6 +73,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
+  '/_authed/reservations': typeof AuthedReservationsRoute
   '/_authed/studios': typeof AuthedStudiosRoute
   '/_authed/user': typeof AuthedUserRoute
   '/_authed/studios_/$studioId': typeof AuthedStudiosStudioIdRouteWithChildren
@@ -74,6 +83,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/reservations'
     | '/studios'
     | '/user'
     | '/studios/$studioId'
@@ -81,6 +91,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/reservations'
     | '/studios'
     | '/user'
     | '/studios/$studioId'
@@ -89,6 +100,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authed'
+    | '/_authed/reservations'
     | '/_authed/studios'
     | '/_authed/user'
     | '/_authed/studios_/$studioId'
@@ -130,6 +142,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedStudiosRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/reservations': {
+      id: '/_authed/reservations'
+      path: '/reservations'
+      fullPath: '/reservations'
+      preLoaderRoute: typeof AuthedReservationsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/studios_/$studioId': {
       id: '/_authed/studios_/$studioId'
       path: '/studios/$studioId'
@@ -161,12 +180,14 @@ const AuthedStudiosStudioIdRouteWithChildren =
   )
 
 interface AuthedRouteChildren {
+  AuthedReservationsRoute: typeof AuthedReservationsRoute
   AuthedStudiosRoute: typeof AuthedStudiosRoute
   AuthedUserRoute: typeof AuthedUserRoute
   AuthedStudiosStudioIdRoute: typeof AuthedStudiosStudioIdRouteWithChildren
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedReservationsRoute: AuthedReservationsRoute,
   AuthedStudiosRoute: AuthedStudiosRoute,
   AuthedUserRoute: AuthedUserRoute,
   AuthedStudiosStudioIdRoute: AuthedStudiosStudioIdRouteWithChildren,

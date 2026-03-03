@@ -24,7 +24,6 @@ const weekdayOptions = [
 export const Route = createFileRoute('/_authed/studios_/$studioId/sessions')({
   component: RouteComponent,
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(convexQuery(api.user.profile, {}))
     await context.queryClient.ensureQueryData(convexQuery(api.studios.listMine, {}))
   },
 })
@@ -115,11 +114,12 @@ function RouteComponent() {
     enabled: participantsQueryDescriptor !== null,
   })
 
-  const canManageSelectedOccurrence =
-    profile !== null &&
-    selectedOccurrence !== null &&
+  const canManageOccurrence = (occurrence: (typeof occurrences)[number]) =>
     selectedStudio !== undefined &&
-    (selectedOccurrence.organizerId === profile._id || selectedStudio.createdBy === profile._id)
+    (occurrence.organizerId === profile?._id || selectedStudio.createdBy === profile?._id)
+
+  const canManageSelectedOccurrence =
+    selectedOccurrence !== null && canManageOccurrence(selectedOccurrence)
 
   const existingOccurrenceParticipantSet = useMemo(
     () => new Set((participantsQuery.data ?? []).map((participant) => participant.userId)),
@@ -378,33 +378,6 @@ function RouteComponent() {
     if (participantsQueryDescriptor !== null) {
       await queryClient.invalidateQueries({ queryKey: participantsQueryDescriptor.queryKey })
     }
-  }
-
-  if (profile === null) {
-    return (
-      <section className="mx-auto w-full max-w-4xl px-1 py-2">
-        <article className="hp-panel border-foreground/12 bg-card p-6 sm:p-8">
-          <p className="hp-chip border-foreground/12 bg-background text-muted-foreground">
-            Sessions
-          </p>
-          <h1 className="mt-4 text-3xl font-bold text-foreground sm:text-4xl">
-            Complete your profile first
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            We need your profile before we can manage sessions.
-          </p>
-          <div className="mt-6">
-            <Link
-              to="/user"
-              search={{ redirectTo: `/studios/${studioId}/sessions` }}
-              className="hp-primary-btn"
-            >
-              Finish profile setup
-            </Link>
-          </div>
-        </article>
-      </section>
-    )
   }
 
   if (selectedStudio === undefined) {
@@ -700,10 +673,7 @@ function RouteComponent() {
                       >
                         Participants
                       </button>
-                      {profile !== null &&
-                      selectedStudio !== undefined &&
-                      (occurrence.organizerId === profile._id ||
-                        selectedStudio.createdBy === profile._id) ? (
+                      {canManageOccurrence(occurrence) ? (
                         <>
                           <button
                             type="button"

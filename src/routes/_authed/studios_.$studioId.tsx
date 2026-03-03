@@ -12,7 +12,6 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 export const Route = createFileRoute('/_authed/studios_/$studioId')({
   component: RouteComponent,
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(convexQuery(api.user.profile, {}))
     await context.queryClient.ensureQueryData(convexQuery(api.studios.listMine, {}))
   },
 })
@@ -20,40 +19,12 @@ export const Route = createFileRoute('/_authed/studios_/$studioId')({
 function RouteComponent() {
   const { studioId } = Route.useParams()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const { data: profile } = useSuspenseQuery(convexQuery(api.user.profile, {}))
   const { data: studios } = useSuspenseQuery(convexQuery(api.studios.listMine, {}))
   const selectedStudio = studios.find((studio) => studio._id === studioId)
   const isSessionsRoute = pathname === `/studios/${studioId}/sessions`
 
   if (isSessionsRoute) {
     return <Outlet />
-  }
-
-  if (profile === null) {
-    return (
-      <section className="mx-auto w-full max-w-4xl px-1 py-2">
-        <article className="hp-panel border-foreground/12 bg-card p-6 sm:p-8">
-          <p className="hp-chip border-foreground/12 bg-background text-muted-foreground">
-            Studio Dashboard
-          </p>
-          <h1 className="mt-4 text-3xl font-bold text-foreground sm:text-4xl">
-            Complete your profile first
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            We need your profile before we can load your studio dashboard.
-          </p>
-          <div className="mt-6">
-            <Link
-              to="/user"
-              search={{ redirectTo: `/studios/${studioId}` }}
-              className="hp-primary-btn"
-            >
-              Finish profile setup
-            </Link>
-          </div>
-        </article>
-      </section>
-    )
   }
 
   if (selectedStudio === undefined) {

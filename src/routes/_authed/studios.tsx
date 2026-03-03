@@ -13,7 +13,6 @@ const createdAtFormatter = new Intl.DateTimeFormat('en-US', {
 export const Route = createFileRoute('/_authed/studios')({
   component: RouteComponent,
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(convexQuery(api.user.profile, {}))
     await context.queryClient.ensureQueryData(convexQuery(api.studios.listMine, {}))
   },
 })
@@ -53,29 +52,6 @@ function RouteComponent() {
     }
   }
 
-  if (profile === null) {
-    return (
-      <section className="mx-auto w-full max-w-4xl px-1 py-2">
-        <article className="hp-panel border-foreground/12 bg-card p-6 sm:p-8">
-          <p className="hp-chip border-foreground/12 bg-background text-muted-foreground">
-            Studio Management
-          </p>
-          <h1 className="mt-4 text-3xl font-bold text-foreground sm:text-4xl">
-            Complete your profile first
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            We need your profile to map each studio to a real account owner.
-          </p>
-          <div className="mt-6">
-            <Link to="/user" search={{ redirectTo: '/studios' }} className="hp-primary-btn">
-              Finish profile setup
-            </Link>
-          </div>
-        </article>
-      </section>
-    )
-  }
-
   return (
     <section className="mx-auto w-full max-w-6xl px-1 py-1 sm:py-2">
       <div className="grid gap-4 lg:grid-cols-[1.06fr_0.94fr]">
@@ -98,7 +74,7 @@ function RouteComponent() {
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <MetricCard label="Owner" value={profile.name} />
+            <MetricCard label="Owner" value={profile?.name ?? 'Account owner'} />
             <MetricCard label="Total Studios" value={String(studios.length)} />
             <MetricCard label="Latest" value={recentStudioName} />
           </div>

@@ -168,6 +168,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     >
                       Home
                     </Link>
+                    <Link
+                      to="/reservations"
+                      className="hp-nav-link"
+                      activeProps={{ className: 'hp-nav-link hp-nav-link-active' }}
+                      inactiveProps={{ className: 'hp-nav-link' }}
+                    >
+                      My reservations
+                    </Link>
                     <MyStudiosMenu pathname={pathname} userId={context.userId} />
                     <Link
                       to="/user"
