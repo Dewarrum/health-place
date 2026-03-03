@@ -45,7 +45,7 @@ function RouteComponent() {
       await upsertProfile({ name, email })
       await queryClient.invalidateQueries({ queryKey: profileQuery.queryKey })
       await queryClient.invalidateQueries({ queryKey: profileDraftQuery.queryKey })
-      await navigate({ to: redirectTo ?? '/posts' })
+      await navigate({ to: redirectTo ?? '/' })
     } catch (submitError) {
       setError(
         submitError instanceof Error

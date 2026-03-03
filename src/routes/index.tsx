@@ -83,7 +83,8 @@ function Home() {
               </SignedOut>
               <SignedIn>
                 <Link
-                  to="/posts"
+                  to="/user"
+                  search={{ redirectTo: undefined }}
                   className="inline-flex items-center justify-center rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-500"
                 >
                   Make a reservation
@@ -91,7 +92,8 @@ function Home() {
               </SignedIn>
               <SignedOut>
                 <Link
-                  to="/posts"
+                  to="/user"
+                  search={{ redirectTo: '/' }}
                   className="inline-flex items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-400"
                 >
                   Browse places
