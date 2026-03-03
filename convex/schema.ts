@@ -8,6 +8,11 @@ export default defineSchema({
     createdAt: v.number(),
     lastLoggedIn: v.number(),
   }).index('by_email', ['email']),
+  studios: defineTable({
+    name: v.string(),
+    address: v.string(),
+    createdBy: v.id('users'),
+  }).index('by_created_by', ['createdBy']),
   userAuth: defineTable({
     tokenIdentifier: v.string(),
     userId: v.id('users'),

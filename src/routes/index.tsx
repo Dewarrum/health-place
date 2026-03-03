@@ -81,6 +81,9 @@ function Home() {
               </SignInButton>
             </SignedOut>
             <SignedIn>
+              <Link to="/studios" className="hp-secondary-btn px-4 py-2.5">
+                Manage studios
+              </Link>
               <Link
                 to="/user"
                 search={{ redirectTo: undefined }}
@@ -135,11 +138,10 @@ function Home() {
 
               <SignedIn>
                 <Link
-                  to="/user"
-                  search={{ redirectTo: undefined }}
+                  to="/studios"
                   className="hp-primary-btn"
                 >
-                  Reserve a class
+                  Manage studios
                 </Link>
                 <Link
                   to="/user"

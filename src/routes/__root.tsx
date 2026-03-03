@@ -154,6 +154,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                       Home
                     </Link>
                     <Link
+                      to="/studios"
+                      className="hp-nav-link"
+                      activeProps={{ className: 'hp-nav-link hp-nav-link-active' }}
+                      inactiveProps={{ className: 'hp-nav-link' }}
+                    >
+                      Studios
+                    </Link>
+                    <Link
                       to="/user"
                       search={{ redirectTo: undefined }}
                       className="hp-nav-link"
