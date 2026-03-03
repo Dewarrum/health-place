@@ -100,6 +100,7 @@ function Home() {
               <SignedIn>
                 <Link
                   to="/user"
+                  search={{ redirectTo: undefined }}
                   className="inline-flex items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-400"
                 >
                   Go to account

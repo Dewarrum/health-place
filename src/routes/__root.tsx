@@ -138,6 +138,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </Link>
             <Link
               to="/user"
+              search={{ redirectTo: undefined }}
               activeProps={{
                 className: 'font-bold',
               }}
@@ -149,7 +150,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 <UserButton />
               </SignedIn>
               <SignedOut>
-                <SignInButton mode="modal" />
+                <SignInButton mode="modal" forceRedirectUrl="/user" />
               </SignedOut>
             </div>
           </div>

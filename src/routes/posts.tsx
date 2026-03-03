@@ -1,11 +1,23 @@
 import { api } from 'convex/_generated/api'
 import { convexQuery } from '@convex-dev/react-query'
-import { Outlet, createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { useAction } from 'convex/react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 
 export const Route = createFileRoute('/posts')({
   loader: async ({ context }) => {
+    if (context.userId) {
+      const profile = await context.queryClient.ensureQueryData(
+        convexQuery(api.user.profile, {}),
+      )
+      if (profile === null) {
+        throw redirect({
+          to: '/user',
+          search: { redirectTo: '/posts' },
+        })
+      }
+    }
+
     await context.queryClient.ensureQueryData({
       ...convexQuery(api.posts.list, {}),
       gcTime: 10000,
