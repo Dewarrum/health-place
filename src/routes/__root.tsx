@@ -5,6 +5,7 @@ import {
   Scripts,
   createRootRouteWithContext,
   useRouteContext,
+  useRouterState,
 } from '@tanstack/react-router'
 import {
   ClerkProvider,
@@ -107,48 +108,53 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const showStarterNav = pathname !== '/'
+
   return (
-    <html>
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
-      <body>
-        <div className="p-2 flex gap-2 text-lg">
-          <Link
-            to="/"
-            activeProps={{
-              className: 'font-bold',
-            }}
-            activeOptions={{ exact: true }}
-          >
-            Home
-          </Link>
-          <Link
-            to="/posts"
-            activeProps={{
-              className: 'font-bold',
-            }}
-          >
-            Posts
-          </Link>
-          <Link
-            to="/user"
-            activeProps={{
-              className: 'font-bold',
-            }}
-          >
-            User
-          </Link>
-          <div className="ml-auto">
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal" />
-            </SignedOut>
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        {showStarterNav ? (
+          <div className="p-2 flex gap-2 text-lg">
+            <Link
+              to="/"
+              activeProps={{
+                className: 'font-bold',
+              }}
+              activeOptions={{ exact: true }}
+            >
+              Home
+            </Link>
+            <Link
+              to="/posts"
+              activeProps={{
+                className: 'font-bold',
+              }}
+            >
+              Posts
+            </Link>
+            <Link
+              to="/user"
+              activeProps={{
+                className: 'font-bold',
+              }}
+            >
+              User
+            </Link>
+            <div className="ml-auto">
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal" />
+              </SignedOut>
+            </div>
           </div>
-        </div>
-        <hr />
+        ) : null}
+        {showStarterNav ? <hr /> : null}
         {children}
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
