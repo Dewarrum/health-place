@@ -1,6 +1,6 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, Outlet, createFileRoute, useRouterState } from '@tanstack/react-router'
 import { type Id } from 'convex/_generated/dataModel'
 import { api } from 'convex/_generated/api'
 
@@ -19,9 +19,15 @@ export const Route = createFileRoute('/_authed/studios_/$studioId')({
 
 function RouteComponent() {
   const { studioId } = Route.useParams()
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
   const { data: profile } = useSuspenseQuery(convexQuery(api.user.profile, {}))
   const { data: studios } = useSuspenseQuery(convexQuery(api.studios.listMine, {}))
   const selectedStudio = studios.find((studio) => studio._id === studioId)
+  const isSessionsRoute = pathname === `/studios/${studioId}/sessions`
+
+  if (isSessionsRoute) {
+    return <Outlet />
+  }
 
   if (profile === null) {
     return (
@@ -112,6 +118,15 @@ function StudioDashboard({ studioId }: { studioId: Id<'studios'> }) {
             label="Created"
             value={dateFormatter.format(data.studio.createdAt)}
           />
+        </div>
+        <div className="mt-5">
+          <Link
+            to="/studios/$studioId/sessions"
+            params={{ studioId }}
+            className="hp-secondary-btn px-4 py-2"
+          >
+            Manage sessions
+          </Link>
         </div>
       </article>
 

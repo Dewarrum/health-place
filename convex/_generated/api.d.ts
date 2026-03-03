@@ -8,6 +8,12 @@
  * @module
  */
 
+import type * as lib_authz from "../lib/authz.js";
+import type * as lib_recurrence from "../lib/recurrence.js";
+import type * as sessionParticipants from "../sessionParticipants.js";
+import type * as sessions from "../sessions.js";
+import type * as sessionsInternal from "../sessionsInternal.js";
+import type * as sessionsTypes from "../sessionsTypes.js";
 import type * as studios from "../studios.js";
 import type * as user from "../user.js";
 
@@ -18,6 +24,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "lib/authz": typeof lib_authz;
+  "lib/recurrence": typeof lib_recurrence;
+  sessionParticipants: typeof sessionParticipants;
+  sessions: typeof sessions;
+  sessionsInternal: typeof sessionsInternal;
+  sessionsTypes: typeof sessionsTypes;
   studios: typeof studios;
   user: typeof user;
 }>;

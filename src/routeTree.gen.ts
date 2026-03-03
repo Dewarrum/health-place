@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedUserRouteImport } from './routes/_authed/user'
 import { Route as AuthedStudiosRouteImport } from './routes/_authed/studios'
 import { Route as AuthedStudiosStudioIdRouteImport } from './routes/_authed/studios_.$studioId'
+import { Route as AuthedStudiosStudioIdSessionsRouteImport } from './routes/_authed/studios_.$studioId.sessions'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -39,18 +40,26 @@ const AuthedStudiosStudioIdRoute = AuthedStudiosStudioIdRouteImport.update({
   path: '/studios/$studioId',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedStudiosStudioIdSessionsRoute =
+  AuthedStudiosStudioIdSessionsRouteImport.update({
+    id: '/sessions',
+    path: '/sessions',
+    getParentRoute: () => AuthedStudiosStudioIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/studios': typeof AuthedStudiosRoute
   '/user': typeof AuthedUserRoute
-  '/studios/$studioId': typeof AuthedStudiosStudioIdRoute
+  '/studios/$studioId': typeof AuthedStudiosStudioIdRouteWithChildren
+  '/studios/$studioId/sessions': typeof AuthedStudiosStudioIdSessionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/studios': typeof AuthedStudiosRoute
   '/user': typeof AuthedUserRoute
-  '/studios/$studioId': typeof AuthedStudiosStudioIdRoute
+  '/studios/$studioId': typeof AuthedStudiosStudioIdRouteWithChildren
+  '/studios/$studioId/sessions': typeof AuthedStudiosStudioIdSessionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -58,13 +67,24 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/_authed/studios': typeof AuthedStudiosRoute
   '/_authed/user': typeof AuthedUserRoute
-  '/_authed/studios_/$studioId': typeof AuthedStudiosStudioIdRoute
+  '/_authed/studios_/$studioId': typeof AuthedStudiosStudioIdRouteWithChildren
+  '/_authed/studios_/$studioId/sessions': typeof AuthedStudiosStudioIdSessionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/studios' | '/user' | '/studios/$studioId'
+  fullPaths:
+    | '/'
+    | '/studios'
+    | '/user'
+    | '/studios/$studioId'
+    | '/studios/$studioId/sessions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/studios' | '/user' | '/studios/$studioId'
+  to:
+    | '/'
+    | '/studios'
+    | '/user'
+    | '/studios/$studioId'
+    | '/studios/$studioId/sessions'
   id:
     | '__root__'
     | '/'
@@ -72,6 +92,7 @@ export interface FileRouteTypes {
     | '/_authed/studios'
     | '/_authed/user'
     | '/_authed/studios_/$studioId'
+    | '/_authed/studios_/$studioId/sessions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -116,19 +137,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedStudiosStudioIdRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/studios_/$studioId/sessions': {
+      id: '/_authed/studios_/$studioId/sessions'
+      path: '/sessions'
+      fullPath: '/studios/$studioId/sessions'
+      preLoaderRoute: typeof AuthedStudiosStudioIdSessionsRouteImport
+      parentRoute: typeof AuthedStudiosStudioIdRoute
+    }
   }
 }
+
+interface AuthedStudiosStudioIdRouteChildren {
+  AuthedStudiosStudioIdSessionsRoute: typeof AuthedStudiosStudioIdSessionsRoute
+}
+
+const AuthedStudiosStudioIdRouteChildren: AuthedStudiosStudioIdRouteChildren = {
+  AuthedStudiosStudioIdSessionsRoute: AuthedStudiosStudioIdSessionsRoute,
+}
+
+const AuthedStudiosStudioIdRouteWithChildren =
+  AuthedStudiosStudioIdRoute._addFileChildren(
+    AuthedStudiosStudioIdRouteChildren,
+  )
 
 interface AuthedRouteChildren {
   AuthedStudiosRoute: typeof AuthedStudiosRoute
   AuthedUserRoute: typeof AuthedUserRoute
-  AuthedStudiosStudioIdRoute: typeof AuthedStudiosStudioIdRoute
+  AuthedStudiosStudioIdRoute: typeof AuthedStudiosStudioIdRouteWithChildren
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedStudiosRoute: AuthedStudiosRoute,
   AuthedUserRoute: AuthedUserRoute,
-  AuthedStudiosStudioIdRoute: AuthedStudiosStudioIdRoute,
+  AuthedStudiosStudioIdRoute: AuthedStudiosStudioIdRouteWithChildren,
 }
 
 const AuthedRouteWithChildren =
