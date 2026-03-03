@@ -50,7 +50,7 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Health Place',
       },
     ],
     links: [
@@ -72,15 +72,13 @@ export const Route = createRootRouteWithContext<{
         sizes: '16x16',
         href: '/favicon-16x16.png',
       },
-      { rel: 'manifest', href: '/site.webmanifest', color: '#fffff' },
+      { rel: 'manifest', href: '/site.webmanifest', color: '#f8f5ee' },
       { rel: 'icon', href: '/favicon.ico' },
     ],
   }),
   beforeLoad: async (ctx) => {
     const clerkAuth = await fetchClerkAuth()
     const { userId, token } = clerkAuth
-    // During SSR only (the only time serverHttpClient exists),
-    // set the Clerk auth token to make HTTP queries with.
     if (token) {
       ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
     }
@@ -109,48 +107,91 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const showStarterNav = pathname !== '/'
+  const showShellNav = pathname !== '/'
 
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen bg-background text-foreground antialiased">
-        {showStarterNav ? (
-          <div className="p-2 flex gap-2 text-lg">
-            <Link
-              to="/"
-              activeProps={{
-                className: 'font-bold',
+      <body>
+        <div className="relative min-h-screen overflow-x-clip">
+          <div className="pointer-events-none fixed inset-0 -z-10">
+            <div
+              className="hp-drift absolute -left-20 top-10 h-80 w-80 rounded-full blur-3xl"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--signal) 15%, transparent)',
               }}
-              activeOptions={{ exact: true }}
-            >
-              Home
-            </Link>
-            <Link
-              to="/user"
-              search={{ redirectTo: undefined }}
-              activeProps={{
-                className: 'font-bold',
+            />
+            <div
+              className="hp-drift absolute -right-20 top-40 h-72 w-72 rounded-full blur-3xl [animation-delay:900ms]"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)',
               }}
-            >
-              User
-            </Link>
-            <div className="ml-auto">
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-              <SignedOut>
-                <SignInButton mode="modal" forceRedirectUrl="/user" />
-              </SignedOut>
-            </div>
+            />
           </div>
-        ) : null}
-        {showStarterNav ? <hr /> : null}
-        {children}
-        <TanStackRouterDevtools position="bottom-right" />
-        <Scripts />
+
+          {showShellNav ? (
+            <header className="sticky top-0 z-40 px-4 pt-4 sm:px-6 lg:px-8">
+              <div className="mx-auto max-w-6xl hp-reveal">
+                <div className="hp-panel flex items-center gap-3 px-3 py-2 sm:px-4 sm:py-3">
+                  <Link
+                    to="/"
+                    className="inline-flex items-center gap-2 rounded-full border border-foreground/12 bg-card px-3 py-1.5 text-sm font-bold uppercase tracking-[0.1em] text-foreground"
+                  >
+                    <span className="h-2 w-2 rounded-full bg-[var(--signal)]" />
+                    Health Place
+                  </Link>
+
+                  <nav className="ml-auto flex items-center gap-1">
+                    <Link
+                      to="/"
+                      activeOptions={{ exact: true }}
+                      className="hp-nav-link"
+                      activeProps={{ className: 'hp-nav-link hp-nav-link-active' }}
+                      inactiveProps={{ className: 'hp-nav-link' }}
+                    >
+                      Home
+                    </Link>
+                    <Link
+                      to="/user"
+                      search={{ redirectTo: undefined }}
+                      className="hp-nav-link"
+                      activeProps={{ className: 'hp-nav-link hp-nav-link-active' }}
+                      inactiveProps={{ className: 'hp-nav-link' }}
+                    >
+                      Account
+                    </Link>
+                  </nav>
+
+                  <SignedIn>
+                    <div className="rounded-full border border-foreground/12 bg-card p-1">
+                      <UserButton />
+                    </div>
+                  </SignedIn>
+                  <SignedOut>
+                    <SignInButton mode="modal" forceRedirectUrl="/user">
+                      <button type="button" className="hp-secondary-btn px-4 py-2">
+                        Sign in
+                      </button>
+                    </SignInButton>
+                  </SignedOut>
+                </div>
+              </div>
+            </header>
+          ) : null}
+
+          {showShellNav ? (
+            <main className="px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+              <div className="mx-auto max-w-6xl hp-reveal">{children}</div>
+            </main>
+          ) : (
+            children
+          )}
+
+          <TanStackRouterDevtools position="bottom-right" />
+          <Scripts />
+        </div>
       </body>
     </html>
   )

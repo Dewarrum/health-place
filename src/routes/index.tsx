@@ -6,16 +6,49 @@ import {
   UserButton,
 } from '@clerk/tanstack-react-start'
 
+const highlights = [
+  {
+    title: 'Smart filters',
+    body: 'Sort by intensity, equipment, trainer style, and neighborhood before you commit.',
+  },
+  {
+    title: 'Live availability',
+    body: 'Spot open reformers and class capacity in real time, not stale snapshots.',
+  },
+  {
+    title: 'One-minute booking',
+    body: 'Save your profile once and reserve sessions with a single confirmation step.',
+  },
+]
+
+const nearbyToday = [
+  {
+    name: 'Contour Pilates Loft',
+    distance: '0.7 mi',
+    detail: 'Beginner reformer, 6:30 PM slot open',
+  },
+  {
+    name: 'Station 12 Strength',
+    distance: '1.1 mi',
+    detail: 'HIIT floor, open until 11:00 PM',
+  },
+  {
+    name: 'Ember Core Studio',
+    distance: '1.4 mi',
+    detail: 'Mobility + sculpt, low-impact sessions',
+  },
+]
+
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
       {
-        title: 'Health Place | Find gyms and Pilates studios',
+        title: 'Health Place | Reserve gyms and Pilates sessions',
       },
       {
         name: 'description',
         content:
-          'Find the right gym or Pilates studio nearby and reserve your next session in minutes.',
+          'Health Place helps you find nearby gyms and Pilates studios, compare availability, and reserve your next session in minutes.',
       },
     ],
   }),
@@ -24,135 +57,188 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-teal-50 via-white to-white">
+    <main className="relative min-h-screen overflow-hidden px-4 pb-12 pt-5 sm:px-6 sm:pb-16 lg:px-8">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-20 top-20 h-56 w-56 rounded-full bg-emerald-200/45 blur-3xl" />
-        <div className="absolute -right-16 top-16 h-64 w-64 rounded-full bg-cyan-200/45 blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-px w-full max-w-6xl -translate-x-1/2 bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col px-4 pb-10 pt-4 sm:px-6 sm:pb-14 sm:pt-6 lg:px-8">
-        <header className="flex items-center justify-between">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10">
+        <header className="hp-reveal flex items-center justify-between gap-3">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white px-3 py-1 text-sm font-semibold text-teal-800"
+            className="inline-flex items-center gap-2 rounded-full border border-foreground/12 bg-card px-4 py-2 text-sm font-bold uppercase tracking-[0.14em] text-foreground"
           >
-            <span className="inline-block size-2 rounded-full bg-teal-500" />
+            <span className="h-2 w-2 rounded-full bg-[var(--signal)]" />
             Health Place
           </Link>
 
           <div className="flex items-center gap-2">
             <SignedOut>
               <SignInButton mode="modal" forceRedirectUrl="/user">
-                <button
-                  type="button"
-                  className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900"
-                >
+                <button type="button" className="hp-secondary-btn px-4 py-2.5">
                   Log in
                 </button>
               </SignInButton>
             </SignedOut>
             <SignedIn>
-              <UserButton />
+              <Link
+                to="/user"
+                search={{ redirectTo: undefined }}
+                className="hp-secondary-btn px-4 py-2.5"
+              >
+                My account
+              </Link>
+              <div className="rounded-full border border-foreground/12 bg-card p-1">
+                <UserButton />
+              </div>
             </SignedIn>
           </div>
         </header>
 
-        <section className="mx-auto mt-14 grid w-full max-w-5xl gap-8 lg:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div className="text-center lg:text-left">
-            <p className="inline-flex rounded-full border border-teal-200 bg-white px-3 py-1 text-xs font-semibold tracking-[0.08em] text-teal-700 uppercase">
-              Gym + Pilates Discovery
-            </p>
-            <h1 className="mt-5 text-balance text-4xl font-semibold leading-tight tracking-tight text-neutral-900 sm:text-5xl">
-              Find the right gym or Pilates studio in minutes.
-            </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-pretty text-base leading-relaxed text-neutral-600 sm:text-lg lg:mx-0">
-              Search nearby places, compare class options at a glance, and book
-              your next workout session in just a few taps.
+        <section className="grid items-start gap-6 lg:grid-cols-[1.12fr_0.88fr] lg:gap-8">
+          <div className="space-y-7 hp-reveal [animation-delay:120ms]">
+            <p className="hp-chip border-foreground/15 bg-card/85 text-muted-foreground">
+              Reservation Engine
             </p>
 
-            <div className="mt-7 flex flex-col items-stretch justify-center gap-3 sm:flex-row lg:justify-start">
+            <div className="space-y-4">
+              <h1 className="max-w-3xl text-balance text-5xl leading-[0.95] font-bold text-foreground sm:text-6xl lg:text-7xl">
+                Train smarter. Book faster. Show up ready.
+              </h1>
+              <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Browse high-energy gyms and focused Pilates studios, compare real-time
+                availability, and reserve your next class without the scheduling chaos.
+              </p>
+            </div>
+
+            <div className="grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-3">
+              <Stat label="Studios listed" value="120+" />
+              <Stat label="Fastest booking" value="42 sec" />
+              <Stat label="Cities growing" value="18" />
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <SignedOut>
                 <SignInButton mode="modal" forceRedirectUrl="/user">
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-500"
-                  >
-                    Make a reservation
+                  <button type="button" className="hp-primary-btn">
+                    Start reserving
                   </button>
                 </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <Link
-                  to="/user"
-                  search={{ redirectTo: undefined }}
-                  className="inline-flex items-center justify-center rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-500"
-                >
-                  Make a reservation
-                </Link>
-              </SignedIn>
-              <SignedOut>
                 <Link
                   to="/user"
                   search={{ redirectTo: '/' }}
-                  className="inline-flex items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-400"
+                  className="hp-secondary-btn"
                 >
-                  Browse places
+                  Explore first
                 </Link>
               </SignedOut>
+
               <SignedIn>
                 <Link
                   to="/user"
                   search={{ redirectTo: undefined }}
-                  className="inline-flex items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-400"
+                  className="hp-primary-btn"
                 >
-                  Go to account
+                  Reserve a class
+                </Link>
+                <Link
+                  to="/user"
+                  search={{ redirectTo: undefined }}
+                  className="hp-secondary-btn"
+                >
+                  Edit profile
                 </Link>
               </SignedIn>
             </div>
+
+            <div className="hp-panel flex max-w-xl items-center gap-3 border-foreground/12 bg-card px-4 py-3">
+              <div
+                className="h-3 w-3 rounded-full bg-[var(--signal)]"
+                style={{
+                  boxShadow: '0 0 0 6px color-mix(in srgb, var(--signal) 18%, transparent)',
+                }}
+              />
+              <p className="text-sm text-muted-foreground">
+                New tonight: reservation hold windows now auto-release after 10 minutes.
+              </p>
+            </div>
           </div>
 
-          <div className="mx-auto w-full max-w-md rounded-2xl border border-teal-100 bg-white/95 p-4 shadow-[0_24px_80px_-24px_rgba(13,148,136,0.35)] backdrop-blur sm:p-5">
-            <div className="rounded-xl border border-teal-100 bg-teal-50 p-3">
-              <p className="text-xs font-medium tracking-wide text-teal-700 uppercase">
-                Nearby today
-              </p>
-              <div className="mt-3 space-y-2.5">
-                <div className="rounded-lg border border-teal-100 bg-white p-3">
-                  <p className="text-sm font-semibold text-neutral-900">
-                    Core Flow Pilates
-                  </p>
-                  <p className="mt-1 text-xs text-neutral-500">
-                    0.9 mi away • Beginner classes
-                  </p>
-                </div>
-                <div className="rounded-lg border border-teal-100 bg-white p-3">
-                  <p className="text-sm font-semibold text-neutral-900">
-                    Southside Strength Gym
-                  </p>
-                  <p className="mt-1 text-xs text-neutral-500">
-                    1.2 mi away • Open until 11:00 PM
-                  </p>
-                </div>
-                <div className="rounded-lg border border-teal-100 bg-white p-3">
-                  <p className="text-sm font-semibold text-neutral-900">
-                    Placeholder Studio
-                  </p>
-                  <p className="mt-1 text-xs text-neutral-500">
-                    Add your own studio cards here later
-                  </p>
-                </div>
+          <div className="hp-panel relative overflow-hidden border-foreground/12 bg-card/95 p-4 hp-reveal [animation-delay:220ms] sm:p-5">
+            <div
+              className="pointer-events-none absolute -right-14 -top-14 h-36 w-36 rounded-full blur-3xl"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--signal) 15%, transparent)',
+              }}
+            />
+            <div className="relative space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="hp-chip border-foreground/12 bg-background text-foreground/70">
+                  Nearby Today
+                </p>
+                <p className="text-xs font-medium tracking-[0.1em] text-muted-foreground uppercase">
+                  Refreshed 2m ago
+                </p>
+              </div>
+
+              <div className="space-y-2.5">
+                {nearbyToday.map((place) => (
+                  <article
+                    key={place.name}
+                    className="rounded-2xl border border-foreground/10 bg-background px-4 py-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-base font-bold text-foreground">{place.name}</h3>
+                      <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                        {place.distance}
+                      </p>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">{place.detail}</p>
+                  </article>
+                ))}
+              </div>
+
+              <div className="rounded-2xl border border-foreground/10 bg-background p-4">
+                <p className="text-sm font-bold text-foreground">Book in one tap</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Save profile details once in your account and move from search to confirmation fast.
+                </p>
               </div>
             </div>
           </div>
         </section>
-      </div>
 
-      <footer className="border-t border-neutral-200 bg-white/85">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-sm text-neutral-600 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <p>© {new Date().getFullYear()} Health Place</p>
-          <p>Find your next class faster.</p>
-        </div>
-      </footer>
+        <section className="grid gap-3 md:grid-cols-3">
+          {highlights.map((item, index) => (
+            <article
+              key={item.title}
+              className="hp-panel border-foreground/12 bg-card px-5 py-5 hp-reveal"
+              style={{ animationDelay: `${280 + index * 90}ms` }}
+            >
+              <p className="text-base font-bold text-foreground">{item.title}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+            </article>
+          ))}
+        </section>
+
+        <footer className="pt-2 text-sm text-muted-foreground">
+          <div className="flex flex-col gap-1 border-t border-foreground/12 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <p>© {new Date().getFullYear()} Health Place</p>
+            <p>Find your next class before someone else grabs the spot.</p>
+          </div>
+        </footer>
+      </div>
     </main>
+  )
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="hp-panel border-foreground/12 bg-card px-4 py-3">
+      <p className="text-xl leading-none font-bold text-foreground sm:text-2xl">{value}</p>
+      <p className="mt-1 text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">
+        {label}
+      </p>
+    </div>
   )
 }
