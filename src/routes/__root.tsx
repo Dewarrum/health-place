@@ -5,6 +5,7 @@ import {
   Scripts,
   createRootRouteWithContext,
   useRouteContext,
+  useNavigate,
   useRouterState,
 } from '@tanstack/react-router'
 import {
@@ -18,11 +19,24 @@ import {
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { createServerFn } from '@tanstack/react-start'
 import * as React from 'react'
+import { convexQuery } from '@convex-dev/react-query'
 import { auth } from '@clerk/tanstack-react-start/server'
+import { useQuery } from '@tanstack/react-query'
+import { ChevronDownIcon } from 'lucide-react'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
 import type { ConvexReactClient } from 'convex/react'
 import type { QueryClient } from '@tanstack/react-query'
+import { api } from 'convex/_generated/api'
+import {
+  Menu,
+  MenuGroup,
+  MenuGroupLabel,
+  MenuItem,
+  MenuPopup,
+  MenuSeparator,
+  MenuTrigger,
+} from '~/components/ui/menu'
 import appCss from '~/styles/app.css?url'
 
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -106,6 +120,7 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const context = useRouteContext({ from: Route.id })
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const showShellNav = pathname !== '/'
 
@@ -153,14 +168,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     >
                       Home
                     </Link>
-                    <Link
-                      to="/studios"
-                      className="hp-nav-link"
-                      activeProps={{ className: 'hp-nav-link hp-nav-link-active' }}
-                      inactiveProps={{ className: 'hp-nav-link' }}
-                    >
-                      Studios
-                    </Link>
+                    <MyStudiosMenu pathname={pathname} userId={context.userId} />
                     <Link
                       to="/user"
                       search={{ redirectTo: undefined }}
@@ -202,5 +210,71 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         </div>
       </body>
     </html>
+  )
+}
+
+function MyStudiosMenu({
+  pathname,
+  userId,
+}: {
+  pathname: string
+  userId: string | null | undefined
+}) {
+  const navigate = useNavigate()
+  const { data: studios, isLoading } = useQuery({
+    ...convexQuery(api.studios.listMine, {}),
+    enabled: userId !== null && userId !== undefined,
+  })
+
+  const isActive = pathname === '/studios' || pathname.startsWith('/studios/')
+
+  return (
+    <Menu>
+      <MenuTrigger
+        className={`hp-nav-link inline-flex items-center gap-1.5 ${isActive ? 'hp-nav-link-active' : ''}`}
+      >
+        My studios
+        <ChevronDownIcon className="h-4 w-4" />
+      </MenuTrigger>
+      <MenuPopup align="end" className="w-64 border-foreground/12 bg-card">
+        <MenuGroup>
+          <MenuGroupLabel>My studios</MenuGroupLabel>
+          {userId === null || userId === undefined ? (
+            <MenuItem
+              onClick={() =>
+                navigate({
+                  to: '/user',
+                  search: { redirectTo: undefined },
+                })
+              }
+            >
+              Sign in to view your studios
+            </MenuItem>
+          ) : isLoading ? (
+            <MenuItem disabled>Loading studios...</MenuItem>
+          ) : studios === undefined || studios.length === 0 ? (
+            <MenuItem disabled>No studios yet</MenuItem>
+          ) : (
+            studios.map((studio) => (
+              <MenuItem
+                key={studio._id}
+                className={pathname === `/studios/${studio._id}` ? 'bg-accent text-accent-foreground' : undefined}
+                onClick={() =>
+                  navigate({
+                    to: '/studios/$studioId',
+                    params: { studioId: studio._id },
+                  })
+                }
+              >
+                {studio.name}
+              </MenuItem>
+            ))
+          )}
+        </MenuGroup>
+
+        <MenuSeparator />
+        <MenuItem onClick={() => navigate({ to: '/studios' })}>Manage studios</MenuItem>
+      </MenuPopup>
+    </Menu>
   )
 }

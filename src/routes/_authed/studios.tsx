@@ -186,9 +186,18 @@ function RouteComponent() {
                       {studio.address}
                     </p>
                   </div>
-                  <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-                    Added {createdAtFormatter.format(studio._creationTime)}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                      Added {createdAtFormatter.format(studio._creationTime)}
+                    </p>
+                    <Link
+                      to="/studios/$studioId"
+                      params={{ studioId: studio._id }}
+                      className="hp-secondary-btn px-3 py-1.5 text-xs"
+                    >
+                      Open dashboard
+                    </Link>
+                  </div>
                 </div>
               </article>
             ))}

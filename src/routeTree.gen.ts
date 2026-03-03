@@ -13,6 +13,7 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedUserRouteImport } from './routes/_authed/user'
 import { Route as AuthedStudiosRouteImport } from './routes/_authed/studios'
+import { Route as AuthedStudiosStudioIdRouteImport } from './routes/_authed/studios_.$studioId'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -33,16 +34,23 @@ const AuthedStudiosRoute = AuthedStudiosRouteImport.update({
   path: '/studios',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedStudiosStudioIdRoute = AuthedStudiosStudioIdRouteImport.update({
+  id: '/studios_/$studioId',
+  path: '/studios/$studioId',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/studios': typeof AuthedStudiosRoute
   '/user': typeof AuthedUserRoute
+  '/studios/$studioId': typeof AuthedStudiosStudioIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/studios': typeof AuthedStudiosRoute
   '/user': typeof AuthedUserRoute
+  '/studios/$studioId': typeof AuthedStudiosStudioIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,13 +58,20 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/_authed/studios': typeof AuthedStudiosRoute
   '/_authed/user': typeof AuthedUserRoute
+  '/_authed/studios_/$studioId': typeof AuthedStudiosStudioIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/studios' | '/user'
+  fullPaths: '/' | '/studios' | '/user' | '/studios/$studioId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/studios' | '/user'
-  id: '__root__' | '/' | '/_authed' | '/_authed/studios' | '/_authed/user'
+  to: '/' | '/studios' | '/user' | '/studios/$studioId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/_authed/studios'
+    | '/_authed/user'
+    | '/_authed/studios_/$studioId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,17 +109,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedStudiosRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/studios_/$studioId': {
+      id: '/_authed/studios_/$studioId'
+      path: '/studios/$studioId'
+      fullPath: '/studios/$studioId'
+      preLoaderRoute: typeof AuthedStudiosStudioIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
 interface AuthedRouteChildren {
   AuthedStudiosRoute: typeof AuthedStudiosRoute
   AuthedUserRoute: typeof AuthedUserRoute
+  AuthedStudiosStudioIdRoute: typeof AuthedStudiosStudioIdRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedStudiosRoute: AuthedStudiosRoute,
   AuthedUserRoute: AuthedUserRoute,
+  AuthedStudiosStudioIdRoute: AuthedStudiosStudioIdRoute,
 }
 
 const AuthedRouteWithChildren =
